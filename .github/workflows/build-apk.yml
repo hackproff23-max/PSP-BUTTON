@@ -1,0 +1,31 @@
+name: Build APK
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch upstream tags
+        run: |
+          git remote add upstream https://github.com/hrydgard/ppsspp.git || true
+          git fetch --no-recurse-submodules --tags --force upstream || true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Assemble APK
+        run: chmod +x ./gradlew && ./gradlew assembleNormalOptimized --stacktrace
+      - name: Package
+        run: |
+          mkdir out
+          cp android/build/*/apk/*/*/*.apk out/ || find . -name "*.apk" -exec cp {} out/ \;
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ppsspp-apk
+          path: out/
