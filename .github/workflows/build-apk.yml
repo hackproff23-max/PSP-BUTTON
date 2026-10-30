@@ -10,6 +10,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: recursive
       - name: Fetch upstream tags
         run: |
           git remote add upstream https://github.com/hrydgard/ppsspp.git || true
@@ -18,13 +19,19 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
+      - name: Check Gradle project files
+        run: |
+          if [ ! -f android/gradlew ] || [ ! -f android/build.gradle ]; then
+            echo "::error::Faltam android/gradlew e/ou android/build.gradle. Envie o projeto Android completo do PPSSPP."
+            exit 1
+          fi
       - name: Assemble APK
+        working-directory: android
         run: chmod +x ./gradlew && ./gradlew assembleNormalOptimized --stacktrace
       - name: Package
         run: |
           mkdir out
-          cp android/build/*/apk/*/*/*.apk out/ || find . -name "*.apk" -exec cp {} out/ \;
+          cp android/build/outputs/apk/*/*/*.apk out/ 2>/dev/null || find . -name "*.apk" -exec cp {} out/ \;
       - uses: actions/upload-artifact@v4
         with:
           name: ppsspp-apk
