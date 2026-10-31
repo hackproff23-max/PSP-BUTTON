@@ -124,7 +124,7 @@ void CustomButtonImagesScreen::CreateDialogViews(UI::ViewGroup *parent) {
 		Choice *import = row->Add(new Choice(label, new LinearLayoutParams(1.0f)));
 		import->OnClick.Add([this, dest, sy](UI::EventParams &e) {
 			File::CreateFullPath(dest.NavigateUp());
-			System_BrowseForImage(GetRequesterToken(), sy->T("Choose PNG..."), dest, [this, dest, sy](const std::string &value, int converted) {
+			System_BrowseForImage(GetRequesterToken(), sy->T("Choose PNG..."), dest, [this, dest, sy](std::string_view valueView, int converted) { std::string value(valueView);
 				if (converted == 1) {
 					// The platform already converted and saved the image to dest.
 				} else if (!value.empty()) {
