@@ -97,11 +97,12 @@ GamepadComponent::GamepadComponent(std::string_view key, UI::LayoutParams *layou
 static void rotateTouchHelper(float &dx, float &dy) {
 	// rotates dx and dy depending on rotation count
 	// modified from controlmapper.cpp
-	if (!g_Config.displayLayoutLandscape.bRotateControlsWithScreen) {
+	const DisplayLayoutConfig &layout = g_Config.GetDisplayLayoutConfig(g_display.GetDeviceOrientation());
+	if (!layout.bRotateControlsWithScreen) {
 		return;
 	}
 	int rotations = 0;
-	switch (g_Config.displayLayoutLandscape.iInternalScreenRotation) {
+	switch (layout.iInternalScreenRotation) {
 	case ROTATION_LOCKED_HORIZONTAL180: rotations = 2; break;
 	case ROTATION_LOCKED_VERTICAL:      rotations = 3; break;
 	case ROTATION_LOCKED_VERTICAL180:   rotations = 1; break;
@@ -133,7 +134,12 @@ bool MultiTouchButton::CanGlide() const {
 }
 
 bool MultiTouchButton::Touch(const TouchInput &input) {
-	_dbg_assert_(input.id >= 0 && input.id < TOUCH_MAX_POINTERS);
+	// input.id comes from platform-specific touch/pointer IDs. Most of our
+	// platforms try to remap to [0, TOUCH_MAX_POINTERS), and all will be updated
+	// to do that in the future.
+	if (input.id < 0 || input.id >= TOUCH_MAX_POINTERS) {
+		return false;
+	}
 
 	bool retval = GamepadComponent::Touch(input);
 	if ((input.flags & TouchInputFlags::DOWN) && bounds_.Contains(input.x, input.y)) {
@@ -362,6 +368,11 @@ void PSPDpad::GetContentDimensions(const UIContext &dc, float &w, float &h) cons
 }
 
 bool PSPDpad::Touch(const TouchInput &input) {
+	// See the comment in MultiTouchButton::Touch().
+	if (input.id < 0 || input.id >= TOUCH_MAX_POINTERS) {
+		return false;
+	}
+
 	bool retval = GamepadComponent::Touch(input);
 
 	if (input.flags & TouchInputFlags::DOWN) {
@@ -464,8 +475,9 @@ void PSPDpad::Draw(UIContext &dc) {
 		return;
 	// from control mapper.cpp
 	int rotations = 0;
-	if (g_Config.displayLayoutLandscape.bRotateControlsWithScreen) {
-		switch (g_Config.displayLayoutLandscape.iInternalScreenRotation) {
+	const DisplayLayoutConfig &layout = g_Config.GetDisplayLayoutConfig(g_display.GetDeviceOrientation());
+	if (layout.bRotateControlsWithScreen) {
+		switch (layout.iInternalScreenRotation) {
 		case ROTATION_LOCKED_HORIZONTAL180: rotations = 2; break;
 		case ROTATION_LOCKED_VERTICAL:      rotations = 3; break;
 		case ROTATION_LOCKED_VERTICAL180:   rotations = 1; break;
@@ -555,6 +567,11 @@ void PSPStick::Draw(UIContext &dc) {
 }
 
 bool PSPStick::Touch(const TouchInput &input) {
+	// See the comment in MultiTouchButton::Touch().
+	if (input.id < 0 || input.id >= TOUCH_MAX_POINTERS) {
+		return false;
+	}
+
 	bool retval = GamepadComponent::Touch(input);
 	if (input.flags & TouchInputFlags::RELEASE_ALL) {
 		dragPointerId_ = -1;
@@ -667,6 +684,10 @@ void PSPCustomStick::Draw(UIContext &dc) {
 }
 
 bool PSPCustomStick::Touch(const TouchInput &input) {
+	if (input.id < 0 || input.id >= TOUCH_MAX_POINTERS) {
+		return false;
+	}
+
 	bool retval = GamepadComponent::Touch(input);
 	if (input.flags & TouchInputFlags::RELEASE_ALL) {
 		dragPointerId_ = -1;
@@ -934,6 +955,10 @@ void InitPadLayout(TouchControlConfig *config, DeviceOrientation orientation, fl
 		int fast_forward_key_X = halfW;
 		int fast_forward_key_Y = screenBottom - bottom_button_Y * scale - 100;
 		initTouchPos(&config->touchFastForwardKey, fast_forward_key_X, fast_forward_key_Y);
+
+		int home_key_X = halfW;
+		int home_key_Y = screenBottom - bottom_button_Y * scale - 150;
+		initTouchPos(&config->touchHomeKey, home_key_X, home_key_Y);
 	} else {
 		int start_key_X = halfW + bottom_key_spacing * scale;
 		int start_key_Y = screenBottom - bottom_button_Y * scale;
@@ -942,6 +967,11 @@ void InitPadLayout(TouchControlConfig *config, DeviceOrientation orientation, fl
 		int select_key_X = halfW;
 		int select_key_Y = screenBottom - bottom_button_Y * scale;
 		initTouchPos(&config->touchSelectKey, select_key_X, select_key_Y);
+
+		// Above select.
+		int home_key_X = halfW;
+		int home_key_Y = select_key_Y - 50;
+		initTouchPos(&config->touchHomeKey, home_key_X, home_key_Y);
 
 		int fast_forward_key_X = halfW - bottom_key_spacing * scale;
 		int fast_forward_key_Y = screenBottom - bottom_button_Y * scale;
@@ -981,6 +1011,15 @@ void InitPadLayout(TouchControlConfig *config, DeviceOrientation orientation, fl
 
 		initTouchPos(&config->touchCustom[i], combo_key_X, combo_key_Y);
 	}
+}
+
+ViewLayoutMode TouchControlsLayoutMode() {
+	// The only control the defaults put in the top third is the centered menu button.
+	const float sideInsetsBottom = System_GetPropertyFloat(SYSPROP_DISPLAY_SIDE_INSETS_BOTTOM);
+	if (sideInsetsBottom >= 0.0f && sideInsetsBottom < g_display.dp_yres / 3.0f) {
+		return ViewLayoutMode::IgnoreSideInsets;
+	}
+	return ViewLayoutMode::ApplyInsets;
 }
 
 UI::ViewGroup *CreatePadLayout(const TouchControlConfig &config, float xres, float yres, bool *pause, ControlMapper *controlMapper) {
@@ -1070,6 +1109,7 @@ GamepadEmuView::GamepadEmuView(const TouchControlConfig &config, float xres, flo
 
 	addPSPButton(CTRL_START, "Start button", rectImage, ImageID("I_RECT"), ImageID("I_START"), config.touchStartKey);
 	addPSPButton(CTRL_SELECT, "Select button", rectImage, ImageID("I_RECT"), ImageID("I_SELECT"), config.touchSelectKey);
+	addPSPButton(CTRL_HOME, "Home button", rectImage, ImageID("I_RECT"), ImageID("I_HOME"), config.touchHomeKey);
 
 	BoolButton *fastForward = addBoolButton(&PSP_CoreParameter().fastForward, "Fast-forward button", rectImage, ImageID("I_RECT"), ImageID("I_FAST_FORWARD_LINE"), config.touchFastForwardKey);
 	if (fastForward) {
@@ -1102,12 +1142,7 @@ GamepadEmuView::GamepadEmuView(const TouchControlConfig &config, float xres, flo
 
 	// Sanitize custom button images, while adding them.
 	for (int i = 0; i < TouchControlConfig::CUSTOM_BUTTON_COUNT; i++) {
-		if (g_Config.CustomButton[i].shape >= ARRAY_SIZE(CustomKeyData::customKeyShapes)) {
-			g_Config.CustomButton[i].shape = 0;
-		}
-		if (g_Config.CustomButton[i].image >= ARRAY_SIZE(CustomKeyData::customKeyImages)) {
-			g_Config.CustomButton[i].image = 0;
-		}
+		CustomKeyData::Sanitize(g_Config.CustomButton[i]);
 
 		char temp[64];
 		snprintf(temp, sizeof(temp), "Custom %d button", i + 1);
@@ -1155,7 +1190,23 @@ GestureGamepad::~GestureGamepad() {
 	}
 }
 
+// The gesture config ints (iDoubleTapGesture/iSwipeUp/Down/Left/Right) are
+// PER_GAME config values loaded from an ini with no range clamp applied, unlike
+// the UI (a PopupMultiChoice) that normally sets them - a hand-edited, corrupted,
+// or version-skewed config could contain an out-of-range value, which would
+// otherwise index GestureKey::keyList[] out of bounds below. Mirrors the bounds
+// check PSPCustomStick::ProcessTouch already does for its own config->buttons[]
+// lookup.
+static bool ValidGestureKeyConfig(int config) {
+	return config > 0 && (size_t)config <= ARRAY_SIZE(GestureKey::keyList);
+}
+
 bool GestureGamepad::Touch(const TouchInput &input) {
+	// See the comment in MultiTouchButton::Touch().
+	if (input.id < 0 || input.id >= TOUCH_MAX_POINTERS) {
+		return false;
+	}
+
 	const GestureControlConfig &zone = GetZone();
 
 	if (usedPointerMask & (1 << input.id)) {
@@ -1184,7 +1235,7 @@ bool GestureGamepad::Touch(const TouchInput &input) {
 
 			const float now = time_now_d();
 			if (now - lastTapRelease_ < 0.3f && !haveDoubleTapped_) {
-				if (zone.iDoubleTapGesture != 0 )
+				if (ValidGestureKeyConfig(zone.iDoubleTapGesture))
 					controlMapper_->PSPKey(DEVICE_ID_TOUCH, GestureKey::keyList[zone.iDoubleTapGesture - 1], KeyInputFlags::DOWN);
 				haveDoubleTapped_ = true;
 			}
@@ -1226,7 +1277,7 @@ bool GestureGamepad::Touch(const TouchInput &input) {
 				lastTapRelease_ = time_now_d();
 
 			if (haveDoubleTapped_) {
-				if (zone.iDoubleTapGesture != 0)
+				if (ValidGestureKeyConfig(zone.iDoubleTapGesture))
 					controlMapper_->PSPKey(DEVICE_ID_TOUCH, GestureKey::keyList[zone.iDoubleTapGesture - 1], KeyInputFlags::UP);
 				haveDoubleTapped_ = false;
 			}
@@ -1262,7 +1313,7 @@ void GestureGamepad::Update() {
 		return;
 	}
 
-	if (GetZone().iSwipeRight != 0) {
+	if (ValidGestureKeyConfig(GetZone().iSwipeRight)) {
 		if (dx > th) {
 			controlMapper_->PSPKey(DEVICE_ID_TOUCH, GestureKey::keyList[GetZone().iSwipeRight - 1], KeyInputFlags::DOWN);
 			swipeRightReleased_ = false;
@@ -1271,7 +1322,7 @@ void GestureGamepad::Update() {
 			swipeRightReleased_ = true;
 		}
 	}
-	if (GetZone().iSwipeLeft != 0) {
+	if (ValidGestureKeyConfig(GetZone().iSwipeLeft)) {
 		if (dx < -th) {
 			controlMapper_->PSPKey(DEVICE_ID_TOUCH, GestureKey::keyList[GetZone().iSwipeLeft - 1], KeyInputFlags::DOWN);
 			swipeLeftReleased_ = false;
@@ -1280,7 +1331,7 @@ void GestureGamepad::Update() {
 			swipeLeftReleased_ = true;
 		}
 	}
-	if (GetZone().iSwipeUp != 0) {
+	if (ValidGestureKeyConfig(GetZone().iSwipeUp)) {
 		if (dy < -th) {
 			controlMapper_->PSPKey(DEVICE_ID_TOUCH, GestureKey::keyList[GetZone().iSwipeUp - 1], KeyInputFlags::DOWN);
 			swipeUpReleased_ = false;
@@ -1289,7 +1340,7 @@ void GestureGamepad::Update() {
 			swipeUpReleased_ = true;
 		}
 	}
-	if (GetZone().iSwipeDown != 0) {
+	if (ValidGestureKeyConfig(GetZone().iSwipeDown)) {
 		if (dy > th) {
 			controlMapper_->PSPKey(DEVICE_ID_TOUCH, GestureKey::keyList[GetZone().iSwipeDown - 1], KeyInputFlags::DOWN);
 			swipeDownReleased_ = false;
