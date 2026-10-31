@@ -19,19 +19,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Check Gradle project files
-        run: |
-          if [ ! -f android/gradlew ] || [ ! -f android/build.gradle ]; then
-            echo "::error::Faltam android/gradlew e/ou android/build.gradle. Envie o projeto Android completo do PPSSPP."
-            exit 1
-          fi
       - name: Assemble APK
-        working-directory: android
         run: chmod +x ./gradlew && ./gradlew assembleNormalOptimized --stacktrace
       - name: Package
         run: |
           mkdir out
-          cp android/build/outputs/apk/*/*/*.apk out/ 2>/dev/null || find . -name "*.apk" -exec cp {} out/ \;
+          find . -name "*.apk" -not -path "./out/*" -exec cp {} out/ \;
+          ls -la out
       - uses: actions/upload-artifact@v4
         with:
           name: ppsspp-apk
