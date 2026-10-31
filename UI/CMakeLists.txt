@@ -96,6 +96,8 @@ list(APPEND UISource
 	TouchControlVisibilityScreen.cpp
 	GamepadEmu.h
 	GamepadEmu.cpp
+	CustomButtonImages.cpp
+	CustomButtonImages.h
 	JoystickHistoryView.h
 	JoystickHistoryView.cpp
 	LoadStateConfirmScreen.h
