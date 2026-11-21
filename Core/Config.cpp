@@ -2101,6 +2101,11 @@ void Config::PostLoadCleanup() {
 
 	// The touch layout editor divides by this, and loops forever drawing the grid if it's 0.
 	iTouchSnapGridSize = std::clamp(iTouchSnapGridSize, 2, 256);
+	// PSP BUTTON: multiplayer removido. Rede, servidor adhoc, chat e UPnP ficam sempre desligados.
+	bEnableWlan = false;
+	bEnableAdhocServer = false;
+	bEnableNetworkChat = false;
+	bEnableUPnP = false;
 }
 
 void Config::PreSaveCleanup() {

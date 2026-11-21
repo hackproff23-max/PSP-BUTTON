@@ -145,7 +145,7 @@ void GameSettingsScreen::CreateTabs() {
 	const bool showVR = deviceType == DEVICE_TYPE_VR || g_Config.bForceVR;
 
 	for (const PageDef &def : pageDefs) {
-		if (def.build == &BuildVRSettings && !showVR) {
+		if ((def.build == &BuildVRSettings && !showVR) || def.build == &BuildNetworkingSettings) {  // PSP BUTTON: sem aba de rede
 			continue;
 		}
 		std::function<void(SettingsPage *)> build = def.build;
