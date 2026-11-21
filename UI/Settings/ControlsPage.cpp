@@ -93,6 +93,7 @@ void BuildControlsSettings(SettingsPage *page) {
 		}).Enabled(&g_Config.bShowTouchControls);
 
 		page->Setting(&g_Config.iTouchButtonStyle).Enabled(&g_Config.bShowTouchControls);
+		page->Setting(&g_Config.iTouchButtonTheme).Enabled(&g_Config.bShowTouchControls);
 
 		page->Setting(&g_Config.iTouchButtonOpacity).Enabled(&g_Config.bShowTouchControls);
 		page->Setting(&g_Config.iTouchButtonHideSeconds).Enabled(&g_Config.bShowTouchControls);

@@ -525,6 +525,7 @@ public:
 
 	// Control Style
 	int iTouchButtonStyle;
+	int iTouchButtonTheme;  // 0 = Padrao, 1 = Neon, 2 = Retro
 	int iTouchButtonOpacity;
 	int iTouchButtonHideSeconds;
 

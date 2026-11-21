@@ -1281,6 +1281,7 @@ static constexpr ConfigSetting touchControlSettings[] = {
 };
 
 static constexpr const char *touchButtonStyleNames[] = { "Classic", "Thin borders", "Glowing borders" };
+static constexpr const char *touchButtonThemeNames[] = { "Padrão", "Neon", "Retro" };
 
 static constexpr ConfigSetting controlSettings[] = {
 	ConfigSetting("HapticFeedback", SETTING(g_Config, bHapticFeedback), false, CfgFlag::PER_GAME)
@@ -1334,6 +1335,8 @@ static constexpr ConfigSetting controlSettings[] = {
 		.Label(I18NCat::CONTROLS, "Ignore gamepads when not focused"),
 	ConfigSetting("TouchButtonStyle", SETTING(g_Config, iTouchButtonStyle), 1, CfgFlag::PER_GAME)
 		.Label(I18NCat::CONTROLS, "Button style").Choices(touchButtonStyleNames),
+	ConfigSetting("TouchButtonTheme", SETTING(g_Config, iTouchButtonTheme), 0, CfgFlag::PER_GAME)
+		.Label(I18NCat::CONTROLS, "Button theme", "Tema de botões").Choices(touchButtonThemeNames),
 	ConfigSetting("TouchButtonOpacity", SETTING(g_Config, iTouchButtonOpacity), 65, CfgFlag::PER_GAME)
 		.Label(I18NCat::CONTROLS, "Button Opacity").Range(0, 100).Units("%"),
 	ConfigSetting("TouchButtonHideSeconds", SETTING(g_Config, iTouchButtonHideSeconds), 8, CfgFlag::PER_GAME)
