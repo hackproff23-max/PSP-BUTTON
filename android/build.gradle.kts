@@ -143,7 +143,7 @@ android {
 		}
 		create("optimized") {
 			isMinifyEnabled = false
-			isJniDebuggable = true
+			isJniDebuggable = false  // PSP BUTTON: build Release, sem simbolos de debug
 			signingConfig = signingConfigs.getByName("debug")
 		}
 		getByName("release") {
@@ -205,7 +205,7 @@ android {
 				}
 			}
 			ndk {
-				abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
+				abiFilters.addAll(listOf("arm64-v8a"))
 				// debugSymbolLevel = "FULL"  // These don't actually help much in the Google Play crash report. We do still have symbols locally.
 			}
 		}
@@ -225,7 +225,7 @@ android {
 				}
 			}
 			ndk {
-				abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
+				abiFilters.addAll(listOf("arm64-v8a"))
 				// debugSymbolLevel = "FULL"
 			}
 		}
@@ -246,7 +246,7 @@ android {
 				}
 			}
 			ndk {
-				abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
+				abiFilters.addAll(listOf("arm64-v8a"))
 				// debugSymbolLevel = "FULL"
 			}
 		}
