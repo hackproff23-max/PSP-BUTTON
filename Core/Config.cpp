@@ -145,7 +145,7 @@ int DefaultDepthRaster() {
 #if PPSSPP_ARCH(ARM64_NEON) || PPSSPP_ARCH(SSE2)
 
 #if PPSSPP_PLATFORM(ANDROID) || PPSSPP_PLATFORM(IOS)
-	return (int)DepthRasterMode::LOW_QUALITY;
+	return (int)DepthRasterMode::OFF;
 #else
 	return (int)DepthRasterMode::DEFAULT;
 #endif
@@ -339,7 +339,7 @@ static void OnButtonPreferenceChanged() {
 static constexpr ConfigSetting generalSettings[] = {
 	ConfigSetting("FirstRun", SETTING(g_Config, bFirstRun), true, CfgFlag::DEFAULT),
 	ConfigSetting("RunCount", SETTING(g_Config, iRunCount), 0, CfgFlag::DEFAULT),
-	ConfigSetting("Enable Logging", SETTING(g_Config, bEnableLogging), true, CfgFlag::PER_GAME),
+	ConfigSetting("Enable Logging", SETTING(g_Config, bEnableLogging), false, CfgFlag::PER_GAME),
 	ConfigSetting("FileLogging", SETTING(g_Config, bEnableFileLogging), false, CfgFlag::PER_GAME)
 		.Label(I18NCat::DEVELOPER, "Log to file"),
 	ConfigSetting("AutoRun", SETTING(g_Config, bAutoRun), true, CfgFlag::DEFAULT),
@@ -585,7 +585,7 @@ static int DefaultInternalResolution() {
 		return 4;
 	}
 	int longestDisplaySide = std::max(System_GetPropertyInt(SYSPROP_DISPLAY_XRES), System_GetPropertyInt(SYSPROP_DISPLAY_YRES));
-	int scale = longestDisplaySide >= 1000 ? 2 : 1;
+	int scale = 2;  // PSP BUTTON: perfil leve, resolucao interna 2x
 	INFO_LOG(Log::Config, "Longest display side: %d pixels. Choosing scale %d", longestDisplaySide, scale);
 	return scale;
 #elif PPSSPP_PLATFORM(IOS)
@@ -959,7 +959,7 @@ static constexpr ConfigSetting graphicsSettings[] = {
 	ConfigSetting("HighQualityDepth", SETTING(g_Config, bHighQualityDepth), true, CfgFlag::PER_GAME | CfgFlag::REPORT),
 	ConfigSetting("FrameSkip", SETTING(g_Config, iFrameSkip), 0, CfgFlag::PER_GAME | CfgFlag::REPORT)
 		.Label(I18NCat::GRAPHICS, "Frame Skipping").Choices(frameSkipNames),
-	ConfigSetting("AutoFrameSkip", SETTING(g_Config, bAutoFrameSkip), false, CfgFlag::PER_GAME | CfgFlag::REPORT)
+	ConfigSetting("AutoFrameSkip", SETTING(g_Config, bAutoFrameSkip), true, CfgFlag::PER_GAME | CfgFlag::REPORT)
 		.Label(I18NCat::GRAPHICS, "Auto FrameSkip").OnChanged(&OnAutoFrameSkipChanged),
 	ConfigSetting("StereoRendering", SETTING(g_Config, bStereoRendering), false, CfgFlag::PER_GAME)
 		.Label(I18NCat::GRAPHICS, "Stereo rendering"),
@@ -979,7 +979,7 @@ static constexpr ConfigSetting graphicsSettings[] = {
 #endif
 
 	// Most low-performance (and many high performance) mobile GPUs do not support aniso anyway so defaulting to 4 is fine.
-	ConfigSetting("AnisotropyLevel", SETTING(g_Config, iAnisotropyLevel), 4, CfgFlag::PER_GAME)
+	ConfigSetting("AnisotropyLevel", SETTING(g_Config, iAnisotropyLevel), 0, CfgFlag::PER_GAME)
 		.Label(I18NCat::GRAPHICS, "Anisotropic Filtering").Choices(anisotropyLevelNames).OnChanged(&OnGPUConfigChanged),
 	ConfigSetting("MultiSampleLevel", SETTING(g_Config, iMultiSampleLevel), 0, CfgFlag::PER_GAME)  // Number of samples is 1 << iMultiSampleLevel
 		.Label(I18NCat::GRAPHICS, "Antialiasing (MSAA)").Choices(msaaLevelNames).OnChanged(&OnRenderResizingChanged),
@@ -1115,13 +1115,13 @@ static constexpr const char *audioPlaybackModes[] = { "Smooth (reduces artifacts
 static constexpr ConfigSetting soundSettings[] = {
 	ConfigSetting("Enable", SETTING(g_Config, bEnableSound), true, CfgFlag::PER_GAME)
 		.Label(I18NCat::AUDIO, "Enable Sound"),
-	ConfigSetting("ExtraAudioBuffering", SETTING(g_Config, bExtraAudioBuffering), false, CfgFlag::DEFAULT)
+	ConfigSetting("ExtraAudioBuffering", SETTING(g_Config, bExtraAudioBuffering), true, CfgFlag::DEFAULT)
 		.Label(I18NCat::AUDIO, "AudioBufferingForBluetooth", "Bluetooth-friendly buffer (slower)"),
 	ConfigSetting("AndroidAudioBackend", SETTING(g_Config, iAndroidAudioApi), &DefaultAndroidAudioApi, CfgFlag::DEFAULT)
 		.Label(I18NCat::AUDIO, "Audio API").Choices(androidAudioApiNames),
-	ConfigSetting("AndroidAudioMMap", SETTING(g_Config, bAndroidAudioMMap), true, CfgFlag::DEFAULT)
+	ConfigSetting("AndroidAudioMMap", SETTING(g_Config, bAndroidAudioMMap), false, CfgFlag::DEFAULT)
 		.Label(I18NCat::AUDIO, "Low-latency audio (MMAP)"),
-	ConfigSetting("AudioBufferSize", SETTING(g_Config, iSDLAudioBufferSize), 256, CfgFlag::DEFAULT),
+	ConfigSetting("AudioBufferSize", SETTING(g_Config, iSDLAudioBufferSize), 512, CfgFlag::DEFAULT),
 
 	ConfigSetting("FillAudioGaps", SETTING(g_Config, bFillAudioGaps), true, CfgFlag::DEFAULT)
 		.Label(I18NCat::AUDIO, "Fill audio gaps"),
