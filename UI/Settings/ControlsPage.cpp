@@ -27,6 +27,7 @@
 #include "Core/Config.h"
 #include "Core/ConfigValues.h"
 #include "UI/ControlMappingScreen.h"
+#include "UI/CustomButtonImages.h"
 #include "UI/GameSettingsScreen.h"
 #include "UI/SettingsPage.h"
 #include "UI/Settings/MainSettingsPages.h"
@@ -86,6 +87,7 @@ void BuildControlsSettings(SettingsPage *page) {
 		page->Choice("Edit touch control layout").OpensScreen().OnClick([host](UI::EventParams &e) {
 			host->PageScreenManager()->push(new TouchControlLayoutScreen(host->PageGamePath()));
 		}).Enabled(&g_Config.bShowTouchControls);
+		page->Choice("Custom button images").OpensScreen().OnClick([host](UI::EventParams &e) { host->PageScreenManager()->push(new CustomButtonImagesScreen(host->PageGamePath())); }).Enabled(&g_Config.bShowTouchControls);
 		page->Choice("Gesture mapping").OpensScreen().OnClick([host](UI::EventParams &e) {
 			host->PageScreenManager()->push(new GestureMappingScreen(host->PageGamePath()));
 		}).Enabled(&g_Config.bShowTouchControls);

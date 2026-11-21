@@ -34,7 +34,7 @@ std::string CustomButtonFileName(std::string_view key) {
 }
 
 static Path CustomButtonDir() {
-	return GetSysDirectory(DIRECTORY_SYSTEM) / "buttons";
+	return GetSysDirectory(DIRECTORY_PSP) / "BUTTONS";
 }
 
 Path CustomButtonImagePath(std::string_view name) {
