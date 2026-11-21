@@ -1,12 +1,10 @@
+// PSP BUTTON: Lua removido.
+// A interface continua a mesma (para o resto do codigo compilar), mas nao ha mais interpretador Lua.
 #pragma once
 
 #include <string_view>
 #include <string>
-#include <memory>
-
-#include "ext/sol/forward.hpp"
-
-struct lua_State;
+#include <vector>
 
 enum class LogLineType {
 	Cmd,
@@ -44,7 +42,6 @@ public:
 	void ExecuteConsoleCommand(std::string_view cmd);
 
 private:
-	std::unique_ptr<sol::state> lua_;
 	std::vector<LuaLogLine> lines_;
 };
 
