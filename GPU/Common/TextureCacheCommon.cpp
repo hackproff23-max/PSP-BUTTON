@@ -50,8 +50,8 @@
 // Videos should be updated every few frames, so we forget quickly.
 
 // If a texture hasn't been seen for this many frames, get rid of it.
-#define TEXTURE_KILL_AGE 200
-#define TEXTURE_SECOND_KILL_AGE 100
+#define TEXTURE_KILL_AGE 120  // PSP BUTTON: era 200
+#define TEXTURE_SECOND_KILL_AGE 60  // PSP BUTTON: era 100
 // Used when there are multiple CLUT variants of a texture, to avoid blowing up memory. See #10418
 // We should change this to do shader-based palette expansion.
 #define TEXTURE_KILL_AGE_CLUT 6
@@ -63,8 +63,8 @@
 
 // Below these sizes (in host memory, see EstimateTexMemoryUsage) nothing is evicted. Above them, textures
 // that haven't been used for the kill age are. A single 2048x2048 replacement is 16MB.
-#define TEXCACHE_MIN_PRESSURE 128 * 1024 * 1024
-#define TEXCACHE_SECOND_MIN_PRESSURE 32 * 1024 * 1024
+#define TEXCACHE_MIN_PRESSURE (48 * 1024 * 1024)  // PSP BUTTON: era 128MB
+#define TEXCACHE_SECOND_MIN_PRESSURE (16 * 1024 * 1024)  // PSP BUTTON: era 32MB
 
 static bool MatchFramebuffer(const TextureDefinition &entry, VirtualFramebuffer *framebuffer, u32 texaddrOffset, RasterChannel channel, bool useBufferedRendering, FramebufferMatchInfo *matchInfo);
 static bool GetBestFramebufferCandidate(FramebufferManagerCommon *fbManager, const TextureDefinition &entry, u32 texAddrOffset, AttachCandidate *bestCandidate, const char *context);
