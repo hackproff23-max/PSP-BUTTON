@@ -200,7 +200,7 @@ android {
 						"-DANDROID_PLATFORM=android-21",
 						"-DANDROID_TOOLCHAIN=clang",
 						"-DANDROID_CPP_FEATURES=",
-						"-DANDROID_STL=c++_shared"
+						"-DANDROID_STL=c++_shared", "-DUSE_DISCORD=OFF", "-DUSE_MINIUPNPC=OFF"
 					))
 				}
 			}
@@ -219,7 +219,7 @@ android {
 						"-DANDROID_PLATFORM=android-21",
 						"-DANDROID_TOOLCHAIN=clang",
 						"-DANDROID_CPP_FEATURES=",
-						"-DANDROID_STL=c++_shared",
+						"-DANDROID_STL=c++_shared", "-DUSE_DISCORD=OFF", "-DUSE_MINIUPNPC=OFF",
 						"-DGOLD=TRUE"
 					))
 				}
@@ -240,7 +240,7 @@ android {
 						"-DANDROID_PLATFORM=android-21",
 						"-DANDROID_TOOLCHAIN=clang",
 						"-DANDROID_CPP_FEATURES=",
-						"-DANDROID_STL=c++_shared",
+						"-DANDROID_STL=c++_shared", "-DUSE_DISCORD=OFF", "-DUSE_MINIUPNPC=OFF",
 						"-DANDROID_LEGACY=TRUE"
 					))
 				}
@@ -261,7 +261,7 @@ android {
 						"-DANDROID_PLATFORM=android-21",
 						"-DANDROID_TOOLCHAIN=clang",
 						"-DANDROID_CPP_FEATURES=",
-						"-DANDROID_STL=c++_shared",
+						"-DANDROID_STL=c++_shared", "-DUSE_DISCORD=OFF", "-DUSE_MINIUPNPC=OFF",
 						"-DOPENXR=TRUE",
 						"-DANDROID_LEGACY=TRUE"
 					))
